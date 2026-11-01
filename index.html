@@ -116,7 +116,7 @@ footer{border-top:1px solid var(--ln);margin-top:24px;padding:20px 0;font-size:.
 
 <div id="v-solicitar" hidden><section>
 <h1>Probar solicitud de presupuesto</h1>
-<p class="note"><strong>Es una prueba.</strong> Nada se envía ni se guarda: no hay empresa receptora. Usa datos ficticios; no escribas domicilios ni subas fotos privadas.</p>
+<p class="note"><strong>Es una demostración.</strong> Nada se guarda en una base de datos. Al final podrás enviar el resumen por WhatsApp a IR Centro Creativo, que lo recibirá para probar la demo. No escribas domicilios exactos ni datos privados.</p>
 <div class="panel" id="wiz"></div></section></div>
 
 <div id="v-ideas" hidden><section><h1>Ideas guardadas</h1>
@@ -170,7 +170,7 @@ var CAT=[{"id": "02", "r": "ven", "s": "", "t": "Ventanal de aluminio para livin
 var mem=[];
 function getI(){try{return JSON.parse(localStorage.getItem('ideas')||'[]')}catch(e){return mem}}
 function setI(a){mem=a;try{localStorage.setItem('ideas',JSON.stringify(a))}catch(e){}}
-var S={step:0,items:[],rub:'',need:'',a:{},w:'',h:'',nom:false,loc:'',barrio:'',nombre:'',tel:'',cons:false,done:false};
+var S={step:0,items:[],rub:'',need:'',desc:'',a:{},w:'',h:'',nom:false,loc:'',barrio:'',nombre:'',tel:'',cons:false,done:false};
 var filtro='';
 function byId(id){return CAT.filter(function(c){return String(c.id)===String(id)})[0]}
 /* ---- router ---- */
@@ -203,19 +203,20 @@ $('#ase').addEventListener('click',function(){S.need='ase'});
 var TITLES=['Trabajo','Detalles','Ubicación','Contacto','Revisión'];
 function qs(){return S.need==='ase'?ASE:(S.rub?Q[S.rub][S.need==='rep'?'r':'i']:[])}
 function fld(k,lab,inner){return '<label for="'+k+'">'+lab+'</label>'+inner+'<div class="err" id="e-'+k+'" role="alert"></div>'}
-function summary(){var q=qs();return ['SOLICITUD DE PRUEBA (demostración, no enviada) · Espacios a tu medida','Rubro: '+RUB[S.rub],'Necesidad: '+NEED[S.need],S.items.length?'Ideas o trabajos: '+S.items.join('; '):'']
- .concat(q.map(function(x,i){return S.a[i]?x[0]+': '+S.a[i]:''}),[S.nom?'Medidas: no tengo medidas':(S.w||S.h)?'Medidas orientativas (cm): ancho '+(S.w||'?')+' × alto '+(S.h||'?'):'','Localidad: '+S.loc+(S.barrio?' ('+S.barrio+')':''),'Contacto: '+S.nombre+' · +598 '+S.tel]).filter(Boolean).join('\n')}
+function summary(){var q=qs();return ['SOLICITUD DE PRUEBA · Espacios a tu medida (demostración)','Rubro: '+RUB[S.rub],'Necesidad: '+NEED[S.need],S.items.length?'Ideas o trabajos: '+S.items.join('; '):'']
+ .concat(q.map(function(x,i){return S.a[i]?x[0]+': '+S.a[i]:''}),[S.desc.trim()?'Descripción: '+S.desc.trim():'',S.nom?'Medidas: no tengo medidas':(S.w||S.h)?'Medidas orientativas (cm): ancho '+(S.w||'?')+' × alto '+(S.h||'?'):'','Localidad: '+S.loc+(S.barrio?' ('+S.barrio+')':''),'Contacto: '+S.nombre+' · +598 '+S.tel]).filter(Boolean).join('\n')}
 function wiz(){var n=S.step,h='<div class="tag">Paso '+(n+1)+' de 5 · '+TITLES[n]+'</div><div class="bar" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="'+(n+1)+'"><i style="width:'+(n+1)*20+'%"></i></div>';
- if(S.done){$('#wiz').innerHTML='<h2>Prueba completada en tu pantalla</h2><p class="note">No se envió ni se guardó nada y no hay empresa receptora. Este es el resumen que una empresa real recibiría:</p><pre id="sum"></pre><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cp">Copiar resumen</button><button class="btn ol" id="rs">Empezar otra prueba</button></div><p class="tag" id="cm" role="status"></p>';$('#sum').textContent=summary();return}
+ if(S.done){$('#wiz').innerHTML='<h2>Solicitud lista para enviar</h2><p class="note">Todavía no se envió. Se enviará solo si pulsas el botón de WhatsApp y confirmas el mensaje allí. No se guarda en ninguna base de datos. Este es el resumen:</p><pre id="sum"></pre><div class="row" style="display:flex;gap:8px;flex-wrap:wrap">'+(CFG.wa?'<a class="btn ac" id="wsp" target="_blank" rel="noopener" href="https://wa.me/'+CFG.wa.replace(/\D/g,'')+'?text='+encodeURIComponent(summary())+'">Enviar por WhatsApp</a>':'')+'<button class="btn" id="cp">Copiar resumen</button><button class="btn ol" id="rs">Empezar otra prueba</button></div><p class="tag" id="cm" role="status"></p>';$('#sum').textContent=summary();return}
  if(n===0){h+='<h2>¿Qué necesitas?</h2><div role="radiogroup" aria-label="Necesidad">'+Object.keys(NEED).map(function(k){return '<label class="opt"><input type="radio" name="need" data-k="need" value="'+k+'"'+(S.need===k?' checked':'')+'>'+NEED[k]+'</label>'}).join('')+'</div><div class="err" id="e-need" role="alert"></div>'+
  fld('rub','Rubro','<select id="rub" data-k="rub"><option value="">Elegir rubro…</option>'+Object.keys(RUB).map(function(k){return '<option value="'+k+'"'+(S.rub===k?' selected':'')+'>'+RUB[k]+'</option>'}).join('')+'</select>');
   if(S.items.length)h+='<p class="lb">Ideas o trabajos elegidos</p>'+S.items.map(function(t,i){return '<div class="opt" style="cursor:default;justify-content:space-between">'+esc(t)+'<button class="btn sm ol" data-rm="'+i+'">Quitar</button></div>'}).join('')}
  if(n===1){h+='<h2>'+RUB[S.rub]+' · '+NEED[S.need]+'</h2>'+qs().map(function(x,i){var v=S.a[i]||'';return fld('a'+i,esc(x[0]),x[1]?'<select id="a'+i+'" data-k="a:'+i+'"><option value="">Elegir…</option>'+x[1].map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>':'<input type="text" id="a'+i+'" data-k="a:'+i+'" value="'+esc(v)+'">')}).join('');
   if(S.need!=='ase')h+='<p class="lb">Medidas orientativas (cm, opcionales)</p><div class="two"><div>'+fld('w','Ancho','<input type="text" inputmode="decimal" id="w" data-k="w" value="'+esc(S.w)+'"'+(S.nom?' disabled':'')+'>')+'</div><div>'+fld('h','Alto','<input type="text" inputmode="decimal" id="h" data-k="h" value="'+esc(S.h)+'"'+(S.nom?' disabled':'')+'>')+'</div></div><label class="opt"><input type="checkbox" data-k="nom"'+(S.nom?' checked':'')+'>No tengo medidas</label><p class="tag">Las medidas son orientativas: la empresa confirmará las finales antes de fabricar.</p>';
+  h+=fld('desc','Breve descripción del servicio que necesitas (opcional)','<textarea id="desc" data-k="desc" rows="3" maxlength="300">'+esc(S.desc)+'</textarea>');
   h+='<p class="note">Fotos: esta demo no recibe ni guarda archivos. En una versión real se cargarían aquí, de forma privada.</p>'}
  if(n===2){h+='<h2>Ubicación</h2>'+fld('loc','Localidad','<select id="loc" data-k="loc"><option value="">Elegir…</option>'+['Montevideo','Ciudad de la Costa','Otra (la cobertura se confirma)'].map(function(o){return '<option'+(S.loc===o?' selected':'')+'>'+o+'</option>'}).join('')+'</select>')+fld('barrio','Barrio (opcional)','<input type="text" id="barrio" data-k="barrio" value="'+esc(S.barrio)+'">')+'<p class="tag">No pedimos dirección exacta para probar el recorrido; en una solicitud de visita real se pediría después.</p>'}
- if(n===3){h+='<h2>Contacto</h2>'+fld('nombre','Nombre (ficticio para la prueba)','<input type="text" id="nombre" data-k="nombre" autocomplete="off" value="'+esc(S.nombre)+'">')+fld('tel','WhatsApp (+598)','<input type="tel" inputmode="numeric" id="tel" data-k="tel" autocomplete="off" placeholder="9X XXX XXX" value="'+esc(S.tel)+'">')+'<label class="opt"><input type="checkbox" id="cons" data-k="cons"'+(S.cons?' checked':'')+'>Entiendo que es una prueba: nadie recibirá estos datos y no se guardan.</label><div class="err" id="e-cons" role="alert"></div>'}
- if(n===4){h+='<h2>Revisión</h2><pre id="sum"></pre><p class="note">Quién lo recibe: nadie (demostración). Para qué: solo mostrarte cómo se vería una solicitud.</p>'}
+ if(n===3){h+='<h2>Contacto</h2>'+fld('nombre','Nombre','<input type="text" id="nombre" data-k="nombre" autocomplete="off" value="'+esc(S.nombre)+'">')+fld('tel','WhatsApp (+598)','<input type="tel" inputmode="numeric" id="tel" data-k="tel" autocomplete="off" placeholder="9X XXX XXX" value="'+esc(S.tel)+'">')+'<label class="opt"><input type="checkbox" id="cons" data-k="cons"'+(S.cons?' checked':'')+'>Entiendo que es una demostración: IR Centro Creativo solo recibirá estos datos si yo envío el mensaje por WhatsApp, para atender mi prueba.</label><div class="err" id="e-cons" role="alert"></div>'}
+ if(n===4){h+='<h2>Revisión</h2><pre id="sum"></pre><p class="note">Quién lo recibe: IR Centro Creativo (Isveida Rojas), solo si pulsas enviar en WhatsApp. Para qué: probar esta demostración.</p>'}
  h+='<div class="nav2">'+(n?'<button class="btn ol" id="bk">Atrás</button>':'<span></span>')+'<button class="btn" id="nx">'+(n===4?'Generar prueba de solicitud':'Continuar')+'</button></div>';
  $('#wiz').innerHTML=h;if(n===4)$('#sum').textContent=summary()}
 var dec=/^\d+([.,]\d+)?$/;
@@ -234,7 +235,7 @@ $('#wiz').addEventListener('click',function(e){var t=e.target;
  if(t.id==='bk'){S.step--;wiz()}
  if(t.id==='nx'&&val(S.step)){if(S.step===4){S.done=true}else{if(S.step===1){S.w=S.w.trim().replace(',','.');S.h=S.h.trim().replace(',','.')}S.step++}wiz();window.scrollTo(0,0)}
  if(t.id==='cp'){var m=$('#cm');(navigator.clipboard?navigator.clipboard.writeText(summary()):Promise.reject()).then(function(){m.textContent='Resumen copiado.'},function(){m.textContent='No se pudo copiar. Selecciona el texto manualmente.'})}
- if(t.id==='rs'){S={step:0,items:[],rub:'',need:'',a:{},w:'',h:'',nom:false,loc:'',barrio:'',nombre:'',tel:'',cons:false,done:false};wiz()}});
+ if(t.id==='rs'){S={step:0,items:[],rub:'',need:'',desc:'',a:{},w:'',h:'',nom:false,loc:'',barrio:'',nombre:'',tel:'',cons:false,done:false};wiz()}});
 /* ---- contactos: solo los configurados ---- */
 function links(){var o=[];
  if(CFG.wa)o.push(['WhatsApp '+CFG.waTxt+' (contacto principal)','https://wa.me/'+CFG.wa.replace(/\D/g,'')+'?text='+encodeURIComponent('Hola Isveida, vi la demostración de Espacios a tu medida y quiero una aplicación para mi empresa.')]);
